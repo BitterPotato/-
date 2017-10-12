@@ -15,12 +15,39 @@ public class FlockBehaviour : MonoBehaviour {
         public Vector3 size;
     }
 
-	public Mesh _InstanceMesh;
+    // TODO: why must I write code like this?
+    [System.Serializable]
+    public class FlockParameter
+    {
+        public float neighbor_allowed_dist;
+        public float dtime;
+        public float sepe_weight;
+        public float cohe_weight;
+        public float align_weight;
+        public float mix_weight;
+        public float max_velocity;
+    }
+    struct InnerFlockParameter
+    {
+        public float neighbor_allowed_dist;
+        public float dtime;
+        public float sepe_weight;
+        public float cohe_weight;
+        public float align_weight;
+        public float mix_weight;
+        public float max_velocity;
+    }
+    const int PARAM_SIZE = 28;
+    const int PARAM_INSTANCE = 1;
+
+    public Mesh _InstanceMesh;
 	public Material _InstanceMaterial;
     public ComputeShader _ComputeShader;
 
     public Color[] _ColorOffsets;
     public Cuboid[] _Cuboids;
+
+    public FlockParameter _FlockParameter;
 
     private int mInstanceCount = 60;
     private int mCachedInstanceCount = -1;
@@ -63,7 +90,7 @@ public class FlockBehaviour : MonoBehaviour {
     private void InitFishBuffers() {
 		InitBuffer (ref mFishBuffer, mInstanceCount, FISH_SIZE);
         InitBuffer(ref mOutFishBuffer, mInstanceCount, FISH_SIZE);
-        InitBuffer(ref mComputeArgsBuffer, 1, 1);
+        InitBuffer(ref mComputeArgsBuffer, PARAM_INSTANCE, PARAM_SIZE);
 
 		// init buffer with random values
 		Fish[] fishes = new Fish[mInstanceCount];
@@ -82,8 +109,16 @@ public class FlockBehaviour : MonoBehaviour {
 		}
 		mFishBuffer.SetData(fishes);
 
-        float[] args = new float[1];
-        args[0] = 2.0f;
+        InnerFlockParameter[] args = new InnerFlockParameter[PARAM_INSTANCE];
+        InnerFlockParameter param = new InnerFlockParameter();
+        param.neighbor_allowed_dist = _FlockParameter.neighbor_allowed_dist;
+        param.dtime = _FlockParameter.dtime;
+        param.sepe_weight = _FlockParameter.sepe_weight;
+        param.cohe_weight = _FlockParameter.cohe_weight;
+        param.align_weight = _FlockParameter.align_weight;
+        param.mix_weight = _FlockParameter.mix_weight;
+        param.max_velocity = _FlockParameter.max_velocity;
+        args[0] = param;
         mComputeArgsBuffer.SetData(args);
 
         _InstanceMaterial.SetBuffer("fishBuffer", mFishBuffer);
@@ -103,16 +138,6 @@ public class FlockBehaviour : MonoBehaviour {
         int kernelHandle = _ComputeShader.FindKernel("CSMain");
 
         // move data from CPU to GPU
-        //_ComputeShader.SetFloat("ratio", 1.0f);
-        //_ComputeShader.SetInt("groupSize", 15);
-        //_ComputeShader.SetInt("groupNum", 4);
-        //_ComputeShader.SetFloat("dtime", 0.4f);
-        //_ComputeShader.SetFloat("sepe_weight", 0.1f);
-        //_ComputeShader.SetFloat("cohe_weight", 5.0f);
-        //_ComputeShader.SetFloat("align_weight", 1.0f);
-        //_ComputeShader.SetFloat("change_weight", 0.1f);
-        //_ComputeShader.SetFloat("max_velocity", 5.0f);
-
         _ComputeShader.SetBuffer(kernelHandle, "inputFishes", mFishBuffer);
         // TODO: set outFishBuffer 
         _ComputeShader.SetBuffer(kernelHandle, "outputFishes", mOutFishBuffer);

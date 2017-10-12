@@ -89,9 +89,11 @@ Shader "Custom/flock"
 			fixed4 frag (v2f i) : SV_Target
 			{
 				// sample the texture
-				fixed4 dest = tex2D(_MainTex, i.uv);
+				//fixed4 dest = tex2D(_MainTex, i.uv);
 
-				return blend(i.color, dest);
+				//return blend(i.color, dest);
+				fixed4 col = i.color;
+				return col;
 			}
 			ENDCG
 		}
