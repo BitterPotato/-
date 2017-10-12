@@ -62,7 +62,9 @@
 
 		// diffuse
 		fixed nl = halfLambert(dot(i.worldNormal, worldLightDir));
-		fixed3 diffuse = tex2D(_DiffuseRampTex, fixed2(nl, 0)).rgb * _Color;
+//		fixed3 diffuse = tex2D(_DiffuseRampTex, fixed2(nl, 0)).rgb * _Color;
+		fixed rim = halfLambert(dot(i.worldNormal, worldViewDir));
+		fixed3 diffuse = tex2D(_DiffuseRampTex, fixed2(nl, rim)).rgb * _Color;
 
 		// specular
 		fixed3 halfDir = normalize(worldViewDir + worldLightDir);

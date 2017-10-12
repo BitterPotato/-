@@ -56,5 +56,5 @@
 		}
 	} 
 	// include Pass to cast shadow
-	Fallback "Diffuse"
+	FallBack "Diffuse"
 }
