@@ -27,6 +27,7 @@ public class FlockBehaviour : MonoBehaviour {
 
 	private ComputeBuffer mFishBuffer;
 	private ComputeBuffer mOutFishBuffer;
+    private ComputeBuffer mComputeArgsBuffer;
 	private ComputeBuffer mArgsBuffer;
 	private uint[] mArgs = new uint[5] { 0, 0, 0, 0, 0 };
 
@@ -41,7 +42,7 @@ public class FlockBehaviour : MonoBehaviour {
 		if (mCachedInstanceCount != mInstanceCount)
 			InitFishBuffers();
 		else {
-            //UpdateFishBuffers();
+            UpdateFishBuffers();
         }
 
         Fish[] new_fishes = new Fish[mInstanceCount];
@@ -55,12 +56,14 @@ public class FlockBehaviour : MonoBehaviour {
     {
         UninitBuffer(ref mFishBuffer);
         UninitBuffer(ref mOutFishBuffer);
+        UninitBuffer(ref mComputeArgsBuffer);
         UninitBuffer(ref mArgsBuffer);
     }
 
     private void InitFishBuffers() {
 		InitBuffer (ref mFishBuffer, mInstanceCount, FISH_SIZE);
         InitBuffer(ref mOutFishBuffer, mInstanceCount, FISH_SIZE);
+        InitBuffer(ref mComputeArgsBuffer, 1, 1);
 
 		// init buffer with random values
 		Fish[] fishes = new Fish[mInstanceCount];
@@ -72,14 +75,18 @@ public class FlockBehaviour : MonoBehaviour {
                 (float)random.NextDouble() * cuboid.size.y + cuboid.left_bottom_back.y,
                 (float)random.NextDouble() * cuboid.size.z + cuboid.left_bottom_back.z);
             // fish.velocity
-            fish.velocity = new Vector3(0.0f, 0.0f, 0.0f);
+            fish.velocity = new Vector3(1.0f, 0.0f, 0.0f);
             fish.color = _ColorOffsets[random.Next(_ColorOffsets.Length)];
 
             fishes[i] = fish;
 		}
 		mFishBuffer.SetData(fishes);
-	
-		_InstanceMaterial.SetBuffer("fishBuffer", mFishBuffer);
+
+        float[] args = new float[1];
+        args[0] = 2.0f;
+        mComputeArgsBuffer.SetData(args);
+
+        _InstanceMaterial.SetBuffer("fishBuffer", mFishBuffer);
 
 		// indirect args
 		uint numIndices = (_InstanceMesh != null) ? (uint)_InstanceMesh.GetIndexCount(0) : 0;
@@ -96,9 +103,20 @@ public class FlockBehaviour : MonoBehaviour {
         int kernelHandle = _ComputeShader.FindKernel("CSMain");
 
         // move data from CPU to GPU
+        //_ComputeShader.SetFloat("ratio", 1.0f);
+        //_ComputeShader.SetInt("groupSize", 15);
+        //_ComputeShader.SetInt("groupNum", 4);
+        //_ComputeShader.SetFloat("dtime", 0.4f);
+        //_ComputeShader.SetFloat("sepe_weight", 0.1f);
+        //_ComputeShader.SetFloat("cohe_weight", 5.0f);
+        //_ComputeShader.SetFloat("align_weight", 1.0f);
+        //_ComputeShader.SetFloat("change_weight", 0.1f);
+        //_ComputeShader.SetFloat("max_velocity", 5.0f);
+
         _ComputeShader.SetBuffer(kernelHandle, "inputFishes", mFishBuffer);
         // TODO: set outFishBuffer 
         _ComputeShader.SetBuffer(kernelHandle, "outputFishes", mOutFishBuffer);
+        _ComputeShader.SetBuffer(kernelHandle, "argsBuffer", mComputeArgsBuffer);
         _ComputeShader.Dispatch(kernelHandle, 60 / 4, 1, 1);
 
         //instanceMaterial.SetBuffer("fishBuffer", fishBuffer);

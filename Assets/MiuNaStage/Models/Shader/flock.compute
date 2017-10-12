@@ -1,16 +1,16 @@
 ﻿// Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel CSMain
 
-//uint groupSize = 15;
-//uint groupNum = 4;
-//float neighbor_allowed_dist = 50.0;
-//float dtime = 0.4;
+#define GROUP_SIZE 15
 
-//float sepe_weight = 1.0;
-//float cohe_weight = 1.0;
-//float align_weight = 1.0;
-//float change_weight = 1.0;
-//float max_velocity = 10;
+const float neighbor_allowed_dist = 50.0;
+const float dtime = 0.4;
+
+const float sepe_weight = 0.1;
+const float cohe_weight = 5.0;
+const float align_weight = 1.0;
+const float change_weight = 0.1;
+const float max_velocity = 5;
 
 //cbuffer VS_CONSTANT_BUFFER : register(b0)
 //{
@@ -51,6 +51,9 @@ RWStructuredBuffer<Fish> outputFishes;
 // TODO: why cannot just use array
 shared RWStructuredBuffer<Fish> tempFishes;
 
+RWStructuredBuffer<float> argsBuffer;
+#define RATIO 0
+
 bool isNeighbor(float3 my_position, float3 other_position) {
 	float3 distance = my_position - other_position;
 	if(dot(distance, distance) < 20.0)
@@ -66,7 +69,7 @@ float3 seperation(float3 my_position, float3 other_position) {
 void CSMain (uint3 global_id : SV_DispatchThreadID, uint3 group_index : SV_GroupID
 , uint3 local_id : SV_GroupThreadID)
 {
-	// TODO: insert actual code here!
+	 //TODO: insert actual code here!
  //   Fish now = inputFishes[global_id.x];
  //   Fish future;
 
@@ -80,7 +83,7 @@ void CSMain (uint3 global_id : SV_DispatchThreadID, uint3 group_index : SV_Group
 
  //   for (uint i = 0; i < 4; i++)
  //   {
- //       Fish other = inputFishes[groupSize * i + local_id.x];
+ //       Fish other = inputFishes[GROUP_SIZE * i + local_id.x];
  //       tempFishes[local_id.x] = other;
  //       GroupMemoryBarrierWithGroupSync();
 
@@ -88,7 +91,7 @@ void CSMain (uint3 global_id : SV_DispatchThreadID, uint3 group_index : SV_Group
  //       {
  //           other = tempFishes[j];
 	//		// not self
- //           if (i * groupSize + j != global_id.x && isNeighbor(my_position, other.position))
+ //           if (i * GROUP_SIZE + j != global_id.x && isNeighbor(my_position, other.position))
  //           {
  //               neighberCount++;
 
@@ -118,62 +121,63 @@ void CSMain (uint3 global_id : SV_DispatchThreadID, uint3 group_index : SV_Group
  //   future.color = now.color;
  //   outputFishes[global_id.x] = future;
 
-    //Fish now = inputFishes[global_id.x];
-    //Fish future;
-    //future.color = now.color;
-    //future.position = now.position + float3(0.01, 0.0, 0.0);
-    //future.velocity = now.velocity;
-    //outputFishes[global_id.x] = future;
-
-
     Fish now = inputFishes[global_id.x];
     Fish future;
-
-    float3 my_position = now.position;
-    float3 my_velocity = now.velocity;
-
-    float3 center = my_position;
-    float3 velo_aver = my_velocity;
-    float3 accelleration;
-    uint3 neighberCount = 1;
-
-    for (uint i = 0; i < 4; i++)
-    {
-        Fish other = inputFishes[15 * i + local_id.x];
-        tempFishes[local_id.x] = other;
-        GroupMemoryBarrierWithGroupSync();
-
-        for (uint j = 0; j < 15; j++)
-        {
-            other = tempFishes[j];
-			// not self
-            if (i * 15 + j != global_id.x && isNeighbor(my_position, other.position))
-            {
-                neighberCount++;
-
-                center += other.position;
-                velo_aver += other.velocity;
-                accelleration += seperation(my_position, other.position) * 0.1;
-            }
-        }
-        GroupMemoryBarrierWithGroupSync();
-    }
-
-    center /= neighberCount;
-    velo_aver /= neighberCount;
-
-    future.position = now.position + now.velocity * 0.04;
-
-	// Cohesion
-    accelleration += (center - my_position) * 5.0;
-	// Alignment
-    accelleration += (velo_aver - my_velocity) * 1.0;
-    future.velocity = now.velocity + accelleration * 0.4;
-
-    if (length(future.velocity) > 5)
-        future.velocity = normalize(future.velocity) * 5;
-    future.velocity = lerp(my_velocity, future.velocity, 1.0);
-
     future.color = now.color;
+    //future.position = now.position;
+    future.position = now.position + argsBuffer [0]* float3(0.01, 0.0, 0.0);
+    future.velocity = now.velocity;
     outputFishes[global_id.x] = future;
+
+
+ //   Fish now = inputFishes[global_id.x];
+ //   Fish future;
+
+ //   float3 my_position = now.position;
+ //   float3 my_velocity = now.velocity;
+
+ //   float3 center = my_position;
+ //   float3 velo_aver = my_velocity;
+ //   float3 accelleration;
+ //   uint3 neighberCount = 1;
+
+ //   for (uint i = 0; i < 4; i++)
+ //   {
+ //       Fish other = inputFishes[15 * i + local_id.x];
+ //       tempFishes[local_id.x] = other;
+ //       GroupMemoryBarrierWithGroupSync();
+
+ //       for (uint j = 0; j < 15; j++)
+ //       {
+ //           other = tempFishes[j];
+	//		// not self
+ //           if (i * 15 + j != global_id.x && isNeighbor(my_position, other.position))
+ //           {
+ //               neighberCount++;
+
+ //               center += other.position;
+ //               velo_aver += other.velocity;
+ //               accelleration += seperation(my_position, other.position) * 0.1;
+ //           }
+ //       }
+ //       GroupMemoryBarrierWithGroupSync();
+ //   }
+
+ //   center /= neighberCount;
+ //   velo_aver /= neighberCount;
+
+ //   future.position = now.position + now.velocity * 0.4;
+
+	//// Cohesion
+ //   accelleration += (center - my_position) * 5.0;
+	//// Alignment
+ //   accelleration += (velo_aver - my_velocity) * 1.0;
+ //   future.velocity = now.velocity + accelleration * 0.4;
+
+ //   if (length(future.velocity) > 5)
+ //       future.velocity = normalize(future.velocity) * 5;
+ //   future.velocity = lerp(my_velocity, future.velocity, 0.1);
+
+ //   future.color = now.color;
+ //   outputFishes[global_id.x] = future;
 }

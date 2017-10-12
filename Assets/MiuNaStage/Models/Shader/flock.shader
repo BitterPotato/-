@@ -49,7 +49,6 @@ Shader "Custom/flock"
 				float4 pos : SV_POSITION;
 				fixed4 color : TEXCOORD0;
 				float2 uv : TEXCOORD1;
-				//float4 data : TEXCOORD2;
 			};
 			
 			v2f vert (appdata v, uint instanceID : SV_InstanceID)
@@ -72,11 +71,14 @@ Shader "Custom/flock"
 //#endif
 
 				unity_ObjectToWorld._14_24_34_44 += position;
-				//float4x4 copy;
-				//copy._11_22_33_44 = (1.0, 1.0, 1.0, 1.0);
-				//zRotate(copy, radians(90));
-				//v.data = copy._11_21_12_22;
+
+				// velocity orientation to (1, 0, 0)
+				zRotate(unity_ObjectToWorld, radians(90));
+				yRotate(unity_ObjectToWorld, radians(90));
 				
+				//velocity = float3(1.0, 1.0, 1.0);
+				applyVelocity(unity_ObjectToWorld, velocity);
+
 				float4 temp = mul(unity_ObjectToWorld, v.vertex);
 				o.pos = mul(UNITY_MATRIX_VP, temp);
 				o.color = color;
@@ -90,7 +92,6 @@ Shader "Custom/flock"
 				fixed4 dest = tex2D(_MainTex, i.uv);
 
 				return blend(i.color, dest);
-				//return data;
 			}
 			ENDCG
 		}

@@ -22,18 +22,66 @@ inline float radians(uint degrees)
     return degrees * M_PI / 180.0;
 }
 
+void xRotate(inout float4x4 toModify, float radian)
+{
+    float sinv = sin(radian);
+    float cosv = cos(radian);
+
+    float4x4 rotateMatrix = float4x4(
+					1.0, 0.0, 0.0, 0.0,
+                    0.0, cosv, -sinv, 0.0,
+					0.0, sinv, cosv, 0.0,
+					0.0, 0.0, 0.0, 1.0
+					);
+
+    toModify = mul(toModify, rotateMatrix);
+}
+
+void yRotate(inout float4x4 toModify, float radian)
+{
+    float sinv = sin(radian);
+    float cosv = cos(radian);
+
+    float4x4 rotateMatrix = float4x4(
+					cosv, 0.0, sinv, 0.0,
+                    0.0, 1.0, 0.0, 0.0,
+					-sinv, 0.0, cosv, 0.0,
+					0.0, 0.0, 0.0, 1.0
+					);
+
+    toModify = mul(toModify, rotateMatrix);
+}
+
 void zRotate(inout float4x4 toModify, float radian) 
 {
     float sinv = sin(radian);
     float cosv = cos(radian);
 
-    float4x4 rotateMatrix;
-    // row-first
-    rotateMatrix._11_12_13_14 = (cosv, -sinv, 0.0, 0.0);
-    rotateMatrix._21_22_23_24 = (sinv, cosv, 0.0, 0.0);
-    rotateMatrix._31_32_33_34 = (0.0, 0.0, 1.0, 0.0);
-    rotateMatrix._41_42_43_44 = (0.0, 0.0, 0.0, 1.0);
+    float4x4 rotateMatrix = float4x4(
+					cosv, -sinv, 0.0, 0.0,
+                    sinv, cosv, 0.0, 0.0,
+					0.0, 0.0, 1.0, 0.0,
+					0.0, 0.0, 0.0, 1.0
+					);
 
     toModify = mul(toModify, rotateMatrix);
+}
+
+// fish object space is right-hand and z axis up
+void applyVelocity(inout float4x4 toModify, float3 velocity)
+{
+    float3 forward = normalize(velocity);
+    float3 up = float3(0, 0, 1);
+    // +y
+    float3 sides = normalize(cross(up, forward));
+    float3 uup = cross(forward, sides);
+    
+    float4x4 coord_trans = float4x4(
+        forward.xyz, 0.0,
+        sides.xyz, 0.0,
+        uup.xyz, 0.0,
+        0.0, 0.0, 0.0, 1.0
+    );
+    toModify = mul(toModify, coord_trans);
 }
 #endif // MIUNA_CG_INCLUDED
