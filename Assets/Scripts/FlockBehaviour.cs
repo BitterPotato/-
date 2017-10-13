@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public class FlockBehaviour : MonoBehaviour {
     struct Fish {
@@ -58,6 +59,9 @@ public class FlockBehaviour : MonoBehaviour {
 	private ComputeBuffer mArgsBuffer;
 	private uint[] mArgs = new uint[5] { 0, 0, 0, 0, 0 };
 
+    //private List<int> secondflock = new List<int>();
+    const float X_ADJUST = 0.5f;
+
     void Start() {
 		mArgsBuffer = new ComputeBuffer(1, mArgs.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
 		InitFishBuffers();
@@ -102,7 +106,8 @@ public class FlockBehaviour : MonoBehaviour {
                 (float)random.NextDouble() * cuboid.size.y + cuboid.left_bottom_back.y,
                 (float)random.NextDouble() * cuboid.size.z + cuboid.left_bottom_back.z);
             // fish.velocity
-            fish.velocity = new Vector3(1.0f, 0.0f, 0.0f);
+            //fish.velocity = new Vector3(1.0f, 0.0f, 0.0f);
+            fish.velocity = new Vector3(Random.value + X_ADJUST, Random.value, Random.value);
             fish.color = _ColorOffsets[random.Next(_ColorOffsets.Length)];
 
             fishes[i] = fish;
@@ -142,15 +147,13 @@ public class FlockBehaviour : MonoBehaviour {
         // TODO: set outFishBuffer 
         _ComputeShader.SetBuffer(kernelHandle, "outputFishes", mOutFishBuffer);
         _ComputeShader.SetBuffer(kernelHandle, "argsBuffer", mComputeArgsBuffer);
-        _ComputeShader.Dispatch(kernelHandle, 60 / 4, 1, 1);
+        _ComputeShader.Dispatch(kernelHandle, 4, 1, 1);
 
-        //instanceMaterial.SetBuffer("fishBuffer", fishBuffer);
+        //Fish[] old_fishes = new Fish[mInstanceCount];
+        //mFishBuffer.GetData(old_fishes);
 
-        Fish[] old_fishes = new Fish[mInstanceCount];
-        mFishBuffer.GetData(old_fishes);
-
-        Fish[] new_fishes = new Fish[mInstanceCount];
-        mOutFishBuffer.GetData(new_fishes);
+        //Fish[] new_fishes = new Fish[mInstanceCount];
+        //mOutFishBuffer.GetData(new_fishes);
 
         // swap
         ComputeBuffer tempRefBuffer = mFishBuffer;
