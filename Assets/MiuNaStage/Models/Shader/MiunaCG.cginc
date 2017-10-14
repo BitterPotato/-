@@ -10,6 +10,33 @@ inline fixed halfLambert(fixed value) {
 	return 0.5*value + 0.5;
 }
 
+float2 hash2(float2 p)
+{
+    float2 q = float2(dot(p, float2(127.1, 311.7)),
+							   dot(p, float2(269.5, 183.3)));
+    return frac(sin(q) * 43758.5453);
+}
+
+float voronoi(float2 x)
+{
+    int2 p = floor(x);
+    float2 f = frac(x);
+
+    float res = 8.0f;
+    for (int j = -1; j <= 1; j++)
+    {
+        for (int i = -1; i <= 1; i++)
+        {
+            int2 b = int2(i, j);
+            float2 r = float2(b) - f + hash2(p + b);
+            float d = dot(r, r);
+
+            res = min(res, d);
+        }
+    }
+    return sqrt(res);
+}
+
 // ==== about colors ====
 inline fixed4 blend(fixed4 src, fixed4 dest)
 {

@@ -31,6 +31,7 @@
 				fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz;
 				fixed4 col = fragds(i);
 				col.xyz += ambient;
+				col = col + frac(voronoi(i.pos.xy));
 
 				return col;
 			}
