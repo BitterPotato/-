@@ -1,0 +1,55 @@
+#include "UnityCG.cginc"
+
+sampler2D _MainTex;
+float4 _MainTex_ST;
+
+float _EdgeThickness;
+float _DeltaEdge;
+float _NearEdgeDepth;
+float _FarEdgeDepth;
+
+#define OUTLINE_DIFF_DEPTH 0.00001
+
+struct v2f
+{
+	float2 uv : TEXCOORD0;
+	float4 vertex : SV_POSITION;
+};
+
+v2f outlineVert (appdata_base v)
+{
+	v2f o;
+	o.vertex = UnityObjectToClipPos(v.vertex);
+	float3 projNormal = normalize(UnityObjectToClipPos(v.normal));
+
+	// the farer the vertex is, the thinner the outline is
+	float depth = UnityObjectToViewPos(v.vertex).z;
+
+	// TODO: now linear, can be transferred by using ease function
+	// farer the vertex is, bigger the ratio is
+	float ratio = (depth - _NearEdgeDepth) / (_FarEdgeDepth - _NearEdgeDepth);
+	_EdgeThickness -= _DeltaEdge*ratio;
+
+
+	float4 scaledTrans = _EdgeThickness * float4(projNormal, 0.0f);
+	o.vertex = o.vertex + scaledTrans;
+	o.vertex.z += OUTLINE_DIFF_DEPTH;
+	o.uv = TRANSFORM_TEX(v.texcoord, _MainTex);
+	return o;
+}
+
+fixed4 outlineFrag (v2f i) : SV_Target
+{
+	// sample the texture
+	//fixed4 col = fixed4(0.0, 0.0, 0.0, 0.0);
+	fixed4 col = tex2D(_MainTex, i.uv);
+				
+	// 1. the darker the original color is, the bigger step to darken
+	// 2. the bigger the aisle is, the smaller step to darken
+	fixed _Darken_ATTEN = 0.5f;
+	fixed maxV = max(col.r, max(col.g, col.b));
+	fixed3 lerpVals = normalize(col.rgb)*maxV;
+	col.rgb = lerp((1.0 - _Darken_ATTEN)*col, col, lerpVals);
+
+	return col;
+}

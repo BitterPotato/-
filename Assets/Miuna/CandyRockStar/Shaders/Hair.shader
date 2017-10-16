@@ -3,6 +3,12 @@
 	Properties
 	{
 		_MainTex("Diffuse", 2D) = "white" {}
+
+		// ==== for outline ====
+		_EdgeThickness("Edge Thickness", float) = 0.001
+		_DeltaEdge("Delta Edge", float) = 0.001
+		_NearEdgeDepth("Near Depth(Edge)", float) = 2.0
+		_FarEdgeDepth("Far Depth(Edge)", float) = 4.0
 	}
 		SubShader
 	{
@@ -49,6 +55,21 @@
 		fixed4 col = tex2D(_MainTex, i.uv);
 	return col;
 	}
+		ENDCG
+	}
+			Pass{
+		Name "Outline"
+
+		Cull Front
+		ZTest Less
+
+		CGPROGRAM
+
+#pragma vertex outlineVert
+#pragma fragment outlineFrag
+
+#include "MiunaCharacter.cg"
+
 		ENDCG
 	}
 	}

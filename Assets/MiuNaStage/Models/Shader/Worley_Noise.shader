@@ -45,8 +45,17 @@
 				//fixed4 col = ori + frac(voronoi(32.0*i.vertex.xy));
 				//fixed4 col = ori*abs(perlin_noise(8.0*i.vertex.xy));
 				
-			//return draw_simple(voronoi(i.uv*16.0));
-				noise_color(ori, perlin_noise(i.uv*2.0));
+			
+			float noise = voronoi(i.uv*16.0) * 0.5 + 0.5;
+
+			//float begin = 0.45f;
+			//float end = 0.5f + sin(noise)*0.1f;
+
+			//noise = step(begin, noise)*noise;
+			//noise = step(end, noise);
+			ori *= noise;
+			//noise_color(ori, voronoi(i.uv*16.0));
+				//noise_color(ori, perlin_noise(i.uv*2.0));
 				return ori;
 			}
 			ENDCG
