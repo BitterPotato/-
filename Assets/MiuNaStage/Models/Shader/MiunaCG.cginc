@@ -37,14 +37,6 @@ float voronoi(float2 x)
     return sqrt(res);
 }
 
-// TODO: if do uv animate like this, how does the frag shader interpolate
-void uvAnimate(inout float2 uv, float2 diff, float2 uv_left_top, float2 uv_right_bottom)
-{
-    float2 wh = uv_right_bottom - uv_left_top;
-    uv += diff * wh;
-    uv.x -= step(uv.x, uv_right_bottom.x) * wh.x;
-    uv.y -= step(uv.y, uv_right_bottom.y) * wh.y;
-}
 fixed2 hash22(fixed2 p)
 {
     p = fixed2(dot(p, fixed2(127.1, 311.7)),
@@ -52,6 +44,7 @@ fixed2 hash22(fixed2 p)
 
     return -1.0 + 2.0 * saturate(sin(p) * 43758.5453123);
 }
+
 float perlin_noise(fixed2 p)
 {
     fixed2 pi = floor(p);
@@ -66,6 +59,25 @@ float perlin_noise(fixed2 p)
 					w.y);
 }
 
+float fbm_perlin_noise(fixed2 p)
+{
+    float noise = 0.0;
+
+    noise += 1.0000 * abs(perlin_noise(p));
+    p = 2.0 * p;
+    noise += 0.5000 * abs(perlin_noise(p));
+    p = 2.0 * p;
+    noise += 0.2500 * abs(perlin_noise(p));
+    p = 2.0 * p;
+    noise += 0.1250 * abs(perlin_noise(p));
+    p = 2.0 * p;
+    noise += 0.0625 * abs(perlin_noise(p));
+    p = 2.0 * p;
+    noise = sin(noise);
+    
+    return noise;
+    //noise = sin(noise + p.x / 32.0);
+}
 // ==== about colors ====
 inline fixed4 blend(fixed4 src, fixed4 dest)
 {

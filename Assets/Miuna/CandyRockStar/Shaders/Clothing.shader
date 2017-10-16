@@ -58,6 +58,8 @@
 			ENDCG
 		}
 		Pass {
+			Name "Outline"
+
 			Cull Front
 			ZTest Less
 

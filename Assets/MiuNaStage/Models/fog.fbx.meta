@@ -1,16 +1,19 @@
 fileFormatVersion: 2
-guid: 4e9b418a38581b04397b162d6c2739c7
-timeCreated: 1507963813
+guid: 88063d0d265a8d14c9acf4cfa7a8b6c4
+timeCreated: 1508160659
 licenseType: Free
 ModelImporter:
   serializedVersion: 21
   fileIDToRecycleName:
-    100000: //RootNode
-    400000: //RootNode
-    2300000: //RootNode
-    3300000: //RootNode
+    100000: Box200
+    100002: //RootNode
+    400000: Box200
+    400002: //RootNode
+    2300000: Box200
+    2300002: //RootNode
+    3300000: Box200
+    3300002: //RootNode
     4300000: Box200
-    9500000: //RootNode
   materials:
     importMaterials: 1
     materialName: 0
@@ -80,7 +83,7 @@ ModelImporter:
     hasExtraRoot: 0
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  animationType: 2
+  animationType: 0
   humanoidOversampling: 1
   additionalBone: 0
   userData: 

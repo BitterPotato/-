@@ -52,10 +52,6 @@ SubShader {
 	
 	v2f vert (appdata_full v)
 	{
-		// specific only for this mesh
-		float2 uv_left_top = float2(0.347643, 0.676670);
-		float2 uv_right_bottom = float2(0.457022, 0.786498);
-
 		v2f 		o;
 		float3	viewPos	= UnityObjectToViewPos(v.vertex);
 		float		dist		= length(viewPos);
@@ -72,11 +68,10 @@ SubShader {
 		float4 vpos = v.vertex;
 		
 		vpos.xyz -=   v.normal * saturate(1 - nfadeout) * v.color.a * _ContractionAmount;
-						
-		uvAnimate(v.texcoord.xy, frac(float2(_ScrollX, _ScrollY) * _Time.z), uv_left_top, uv_right_bottom);
+
 		o.uv = v.texcoord.xy;
 
-		//o.uv		= v.texcoord.xy + frac(float2(_ScrollX, _ScrollY) * _Time.y);
+		o.uv		= v.texcoord.xy + frac(float2(_ScrollX, _ScrollY) * _Time.w);
 		//o.uv = v.texcoord.xy;
 		o.pos	= UnityObjectToClipPos(vpos);
 		o.color	= nfadeout * v.color * _Multiplier;
@@ -99,7 +94,7 @@ SubShader {
 		{			
 			fixed4 col = tex2D (_MainTex, i.uv.xy) * i.color;
 		//fixed4 col = fixed4(1.0, 0.0, 0.0, 1.0);
-	noise_color(col, perlin_noise(16.0*i.uv.xy));	
+	noise_color(col, perlin_noise(4.0*i.uv.xy));	
 	return col;
 		}
 		ENDCG 
