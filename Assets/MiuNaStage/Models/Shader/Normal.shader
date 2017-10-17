@@ -50,13 +50,16 @@
 				// transform light to object space, then to tangent space
 				// the normal there as one specific axis
 				TANGENT_SPACE_ROTATION;
-				o.lightDir = mul(rotation, ObjSpaceLightDir(v.vertex)).xyz;
+				o.lightDir = normalize(mul(rotation, ObjSpaceLightDir(v.vertex)).xyz);
+				float3 lightDir = o.lightDir;
 				
 				return o;
 			}
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
+				float3 lightDir = i.lightDir;
+
 				fixed4 ambient = fixed4(40, 78, 178, 255) / 255;
 			float _BumpScale = 1.2;
 				
@@ -71,11 +74,11 @@
 
 			//return normalCol;
 
-			//ambient.r *= nl;
-			//ambient.g *= nl;
-			//ambient.b *= nl;
-				//return ambient;
-			return fixed4(nl, nl, nl, 1.0);
+			ambient.r *= nl;
+			ambient.g *= nl;
+			ambient.b *= nl;
+				return ambient;
+			//return fixed4(i.lightDir.xyz + 0.5, 1.0);
 			}
 			ENDCG
 		}
