@@ -71,7 +71,7 @@ SubShader {
 
 		o.uv = v.texcoord.xy;
 
-		o.uv		= v.texcoord.xy + frac(float2(_ScrollX, _ScrollY) * _Time.w);
+		o.uv		= v.texcoord.xy + frac(float2(_ScrollX, _ScrollY) * _Time.y);
 		//o.uv = v.texcoord.xy;
 		o.pos	= UnityObjectToClipPos(vpos);
 		o.color	= nfadeout * v.color * _Multiplier;
