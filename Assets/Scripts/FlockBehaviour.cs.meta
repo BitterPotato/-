@@ -1,10 +1,13 @@
 fileFormatVersion: 2
 guid: 79a30503313411849aea56f214cf45a7
-timeCreated: 1507459623
+timeCreated: 1508248848
 licenseType: Free
 MonoImporter:
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - _InstanceMesh: {fileID: 4300000, guid: ea611b820be4f3b45b5796f4a126cf23, type: 3}
+  - _InstanceMaterial: {fileID: 2100000, guid: 655d06030650ea34db46419fd51abd77, type: 2}
+  - _ComputeShader: {fileID: 7200000, guid: 24810b24a43486b4fa68a448aa59c1d1, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
