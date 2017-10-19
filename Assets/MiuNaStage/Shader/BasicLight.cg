@@ -1,37 +1,57 @@
-﻿
-
-	#include "UnityCG.cginc"
+﻿	#include "UnityCG.cginc"
 	#include "Lighting.cginc"
 	#include "AutoLight.cginc"
 	#include "MiunaCG.cginc"
 
-	struct appdata
-	{
-		float4 vertex : POSITION;
-		float4 normal : NORMAL;
-	};
+	// include TEX
+	#ifdef DIFFUSE_TEX
+	sampler2D _DiffuseTex;
+	float4 _DiffuseTex_ST;
+	#endif
+	#ifdef DIFFUSE_COLOR
+	float4 _DiffuseColor;
+	#endif
 
-	struct v2f
-	{
-		float4 pos : SV_POSITION;
-		float3 worldNormal : TEXCOORD0;
-		float3 worldPos : TEXCOORD1;
-		SHADOW_COORDS(2)
-	};
-
-	fixed4 _Color;
-
-	fixed4 _DiffuseColor;
-
-	fixed4 _SpecularColor;
+	#ifdef SPECULAR_COLOR
+	float4 _SpecularColor;
+	#endif
 
 	float _Gloss;
 
-	v2f vert (appdata v)
+	#ifdef MULTI
+	float _Multiplier;
+	#endif
+
+	sampler2D _NormalTex;
+	float4 _NormalTex_ST;
+
+	float _NormalBumpScale;
+
+	struct v2f_base
 	{
-		v2f o;
+		float4 pos : SV_POSITION;
+	    float4 texcoord : TEXCOORD0;
+		float3 worldNormal : TEXCOORD1;
+		float3 worldPos : TEXCOORD2;
+		SHADOW_COORDS(3)
+	};
+
+	struct v2f_tan
+	{
+	    float4 pos : SV_POSITION;
+	    float4 texcoord : TEXCOORD0;
+	    float3 objLight : TEXCOORD1;
+		float3 objView : TEXCOORD2;
+	    float3 worldPos : TEXCOORD3;
+		SHADOW_COORDS(4)
+	};
+
+	v2f_base vert_base(appdata_base v)
+	{
+		v2f_base o;
 		o.pos = UnityObjectToClipPos(v.vertex);
-		o.worldNormal = UnityObjectToWorldNormal(v.normal);
+		o.texcoord = v.texcoord;
+		o.worldNormal = normalize(mul(unity_ObjectToWorld, v.normal));
 		o.worldPos = mul(unity_ObjectToWorld, v.vertex);
 
 		TRANSFER_SHADOW(o);
@@ -39,27 +59,111 @@
 		return o;
 	}
 
-	// TODO: how to deal with the each-vertex and SH
-	// blinn-phong model
-	fixed4 fragd (v2f i) : SV_Target
+	// 1. obj's light and view for light cal
+	// 2. worldPos for shadow and atten
+	// IN: _DiffuseTex, _NormalTex
+	v2f_tan vert_tan(appdata_tan v)
+	{
+		v2f_tan o;
+		o.pos = UnityObjectToClipPos(v.vertex);
+		#ifdef DIFFUSE_TEX
+		o.texcoord.xy = TRANSFORM_TEX(v.texcoord, _DiffuseTex);
+		#endif
+		o.texcoord.zw = TRANSFORM_TEX(v.texcoord, _NormalTex);
+
+		TANGENT_SPACE_ROTATION;
+		o.objLight = mul(rotation, ObjSpaceLightDir(v.vertex)).xyz;
+		o.objView = mul(rotation, ObjSpaceViewDir(v.vertex)).xyz;
+		o.worldPos = mul(unity_ObjectToWorld, v.vertex);
+
+		TRANSFER_SHADOW(o);
+
+		return o;
+	}
+
+	// IN: _DiffuseTex, _NormalTex, _NormalBumpScale, _SpecularColor, _Gloss, _Multiplier
+	fixed4 frag_tan_add(v2f_tan i) : SV_Target
+	{
+		// since unity might optimize the storage of normal map,
+		// so we can not directly access the coordinate
+		fixed3 tangentNormal = UnpackNormal(tex2D(_NormalTex, i.texcoord.zw));
+		tangentNormal.xy *= _NormalBumpScale;
+		tangentNormal.z = sqrt(1.0 - saturate(dot(tangentNormal.xy, tangentNormal.xy)));
+
+		// half-lambert diffuse
+		fixed nl = halfLambert(dot(tangentNormal, normalize(i.objLight)));
+		#ifdef DIFFUSE_TEX
+		fixed3 inherent = tex2D(_DiffuseTex, i.texcoord.xy);
+		#endif
+		#ifdef DIFFUSE_COLOR
+		fixed3 inherent = _DiffuseColor;
+		#endif
+		fixed3 diffuse = inherent * nl * _LightColor0.rgb;
+
+		#ifdef BP_SPECULAR
+		// blinn-phong specular
+		fixed3 halfDir = normalize(i.objView + i.objLight);
+		fixed oriSpec = _SpecularColor * pow(max(0, dot(halfDir, tangentNormal)), _Gloss);
+		#endif
+		#ifndef BP_SPECULAR
+		fixed oriSpec = 0.0;
+		#endif
+		fixed3 specular = oriSpec * _LightColor0.rgb;
+
+		UNITY_LIGHT_ATTENUATION(atten, i, i.worldPos);
+
+		#ifdef MULTI
+		return fixed4((diffuse + specular) * atten * _Multiplier, 1.0);
+		#endif
+		#ifndef MULTI
+		return fixed4((diffuse + specular) * atten, 1.0);
+		#endif
+	}
+
+	fixed4 frag_tan_base(v2f_tan i) : SV_Target
+	{
+		fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz;
+		return frag_tan_add(i) + fixed4(ambient, 1.0);
+	}
+
+	fixed4 frag_base_add(v2f_base i) : SV_Target
 	{
 		fixed3 worldViewDir = normalize(UnityWorldSpaceViewDir(i.worldPos));
 		fixed3 worldLightDir = normalize(UnityWorldSpaceLightDir(i.worldPos));
-		fixed3 wordldNormal = normalize(i.worldNormal);
+		fixed3 worldNormal = normalize(i.worldNormal);
 
-		// diffuse
 		fixed nl = halfLambert(dot(i.worldNormal, worldLightDir));
-		fixed3 diffuse = _DiffuseColor * nl * _Color;
+		#ifdef DIFFUSE_TEX
+		fixed3 inherent = tex2D(_DiffuseTex, i.texcoord.xy).rgb;
+		#endif
+		#ifdef DIFFUSE_COLOR
+		fixed3 inherent = _DiffuseColor;
+		#endif
+		fixed3 diffuse = inherent * nl * _LightColor0.rgb;
 
-		// specular
+		#ifdef BP_SPECULAR
 		fixed3 halfDir = normalize(worldViewDir + worldLightDir);
-		fixed coeff = pow(max(0, dot(halfDir, wordldNormal)), _Gloss);
-		fixed3 specular = _SpecularColor * coeff * _Color;
+		fixed oriSpec = _SpecularColor * pow(max(0, dot(halfDir, worldNormal)), _Gloss);
+		#endif
+		#ifndef BP_SPECULAR
+		fixed oriSpec = 0.0;
+		#endif
+		fixed3 specular =  oriSpec * _LightColor0.rgb;
 
 		// combine shadow to light atten
 		UNITY_LIGHT_ATTENUATION(atten, i, i.worldPos);
-		fixed4 col = fixed4((diffuse + specular)*_LightColor0.rgb*atten, 1.0);
+		
+		#ifdef MULTI
+		return fixed4((diffuse + specular) * atten * _Multiplier, 1.0);
+		#endif
+		#ifndef MULTI
+		return fixed4((diffuse + specular) * atten, 1.0);
+		#endif
+	}
 
-		return col;
+	fixed4 frag_base_base(v2f_base i) : SV_Target
+	{
+		fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz;
+		return frag_base_add(i) + fixed4(ambient, 1.0);
 	}
 

@@ -3,11 +3,20 @@
 
 #define M_PI 3.14159265358979323846
 
+inline float shiftRange(float value)
+{
+    return 0.5 * value + 0.5;
+}
+
+inline fixed shiftRange(fixed value)
+{
+    return 0.5 * value + 0.5;
+}
 // ==== about lights ====
 // Reference: Valve
 // from [-1, 1] to [0, 1]
 inline fixed halfLambert(fixed value) {
-	return 0.5*value + 0.5;
+    return shiftRange(value);
 }
 
 float2 hash2(float2 p)

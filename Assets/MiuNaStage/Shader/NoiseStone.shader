@@ -2,7 +2,7 @@
 {
 	Properties
 	{
-		_Color("Diffuse", Color) = (1, 1, 1, 1)
+		_DiffuseColor("Diffuse Color", Color) = (1, 1, 1, 1)
 	}
 		SubShader
 	{
@@ -15,47 +15,26 @@
 
 		CGPROGRAM
 		#pragma multi_compile_fwdbase
-		#pragma vertex vert
-		#pragma fragment frag
 
-		#include "UnityCG.cginc"
-		#include "MiunaCG.cginc"
+#pragma vertex vert_base
+#pragma fragment frag
 
-		fixed4 _Color;
+#define DIFFUSE_COLOR
+#include "BasicLight.cg"
 
-		struct appdata
-	{
-		float4 vertex : POSITION;
-		fixed2 uv : TEXCOORD0;
-	};
-
-	struct v2f
-	{
-		float4 vertex : SV_POSITION;
-		fixed2 uv : TEXCOORD0;
-	};
-
-	v2f vert(appdata v)
-	{
-		v2f o;
-		o.vertex = UnityObjectToClipPos(v.vertex);
-		o.uv = v.uv;
-		return o;
-	}
-
-	fixed4 frag(v2f i) : SV_Target
+	fixed4 frag(v2f_base i) : SV_Target
 	{
 
-		float noise = fbm_perlin_noise(i.uv*16.0) * 0.5 + 0.5;
+		float noise = shiftRange(fbm_perlin_noise(i.texcoord.xy*16.0));
 		// TODO: 拉开最低值和最高值的差距，构成对比；并保留飞线形
-		noise = (1 - clamp(noise, 0.0, 0.6)) * 3;
+		noise = (1 - clamp(noise, 0.0, 0.6)) * 1.5;
 
 		//float begin = 0.45f;
 		//float end = 0.5f + sin(noise)*0.1f;
 
 		//noise = step(begin, noise)*noise;
 		//noise = step(end, noise);
-		fixed4 col = _Color *  noise;
+		fixed4 col = frag_base_base(i) *  noise;
 		//noise_color(ori, voronoi(i.uv*16.0));
 		//noise_color(ori, perlin_noise(i.uv*2.0));
 		return col;
@@ -71,9 +50,10 @@
 
 #pragma multi_compile_fwdadd
 
-#pragma vertex vert
-#pragma fragment fragd
+#pragma vertex vert_base
+#pragma fragment frag_base_add
 
+#define DIFFUSE_COLOR
 #include "BasicLight.cg"
 
 		ENDCG

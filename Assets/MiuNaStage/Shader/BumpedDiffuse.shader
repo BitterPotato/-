@@ -83,6 +83,7 @@ Shader "Unity Shaders Book/Common/Bumped Diffuse" {
 				
 				UNITY_LIGHT_ATTENUATION(atten, i, worldPos);
 				
+				//return fixed4(atten, atten, atten, 1.0);
 				return fixed4(ambient + diffuse * atten, 1.0);
 			}
 			
