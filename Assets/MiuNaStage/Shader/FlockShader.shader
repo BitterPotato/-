@@ -91,9 +91,8 @@ Shader "Custom/flock"
 				// sample the texture
 				fixed4 dest = tex2D(_MainTex, i.uv);
 
-				return blend(i.color, dest);
-				//fixed4 col = i.color;
-				//return col;
+				return blend(i.color, dest);	
+				//return i.color;
 			}
 			ENDCG
 		}

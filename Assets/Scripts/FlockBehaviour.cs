@@ -27,6 +27,7 @@ public class FlockBehaviour : MonoBehaviour {
         public float align_weight;
         public float mix_weight;
         public float max_velocity;
+        public float fov_degree;
     }
     struct InnerFlockParameter
     {
@@ -37,8 +38,9 @@ public class FlockBehaviour : MonoBehaviour {
         public float align_weight;
         public float mix_weight;
         public float max_velocity;
+        public float fov_degree;
     }
-    const int PARAM_SIZE = 28;
+    const int PARAM_SIZE = 8 * 4;
     const int PARAM_INSTANCE = 1;
 
     public Mesh _InstanceMesh;
@@ -123,6 +125,7 @@ public class FlockBehaviour : MonoBehaviour {
         param.align_weight = _FlockParameter.align_weight;
         param.mix_weight = _FlockParameter.mix_weight;
         param.max_velocity = _FlockParameter.max_velocity;
+        param.fov_degree = _FlockParameter.fov_degree;
         args[0] = param;
         mComputeArgsBuffer.SetData(args);
 
