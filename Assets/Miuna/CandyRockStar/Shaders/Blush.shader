@@ -9,7 +9,7 @@
 		Tags{ 
 			// let the blush be rendered after face
 			"Queue" = "Transparent"
-			"LightMode" = "ForwardBase"
+			"IgnoreProjector" = "True"
 		}
 		LOD 100
 
