@@ -6,13 +6,18 @@
 	}
 		SubShader
 	{
-		Tags{ "RenderType" = "Opaque" }
+		Tags{ 
+			// let the blush be rendered after face
+			"Queue" = "Transparent"
+			"LightMode" = "ForwardBase"
+		}
 		LOD 100
 
 		Pass
 	{
+		Blend SrcAlpha OneMinusSrcAlpha, One One
 		Cull Back
-		ZTest LEqual
+		ZTest OFF
 
 		CGPROGRAM
 #pragma vertex vert

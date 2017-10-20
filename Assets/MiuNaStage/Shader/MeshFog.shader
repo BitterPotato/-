@@ -23,7 +23,7 @@ SubShader {
 	
 	Blend One One
 //	Blend One OneMinusSrcColor
-	Cull Off Lighting Off ZWrite Off Fog { Color (0,0,0,0) }
+	Cull Off Lighting Off ZWrite Off
 	
 	LOD 100
 	

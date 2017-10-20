@@ -6,11 +6,12 @@
 	}
 		SubShader
 	{
-		Tags{ "RenderType" = "Opaque" }
+		Tags{ "Queue" = "Transparent" }
 		LOD 100
 
 		Pass
 	{
+		Blend SrcAlpha OneMinusSrcAlpha, One One
 		Cull Back
 		ZTest LEqual
 
