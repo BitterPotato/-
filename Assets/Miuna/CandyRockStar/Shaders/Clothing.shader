@@ -3,6 +3,7 @@
 	Properties
 	{
 		_MainTex ("Diffuse", 2D) = "white" {}
+		_SpecularTex("Specular", 2D) = "white" {}
 
 		// ==== for outline ====
 		_EdgeThickness ("Edge Thickness", float) = 0.001
@@ -40,37 +41,47 @@
 
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
+
+			sampler2D _SpecularTex;
+			float4 _SpecularTex_ST;
 			
 			v2f vert (appdata v)
 			{
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
 				o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+
 				return o;
 			}
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
 				// sample the texture
-				fixed4 col = tex2D(_MainTex, i.uv);
-				return col;
+				fixed3 tCol = fixed3(0.0, 0.0, 0.0);
+				tCol += tex2D(_MainTex, i.uv).xyz;
+				
+				// TODO: temply
+				tCol += tex2D(_SpecularTex, i.uv).xyz * 0.2;
+
+				return fixed4(tCol, 1.0);
 			}
 			ENDCG
 		}
-		Pass {
-			Name "Outline"
+		// TODO: outline is not in balance
+		//Pass {
+		//	Name "Outline"
 
-			Cull Front
-			ZTest Less
+		//	Cull Front
+		//	ZTest Less
 
-			CGPROGRAM
+		//	CGPROGRAM
 
-			#pragma vertex outlineVert
-			#pragma fragment outlineFrag
+		//	#pragma vertex outlineVert
+		//	#pragma fragment outlineFrag
 
-			#include "MiunaCharacter.cg"
+		//	#include "MiunaCharacter.cg"
 
-			ENDCG
-		}
+		//	ENDCG
+		//}
 	}
 }

@@ -67,6 +67,7 @@ public class FlockBehaviour : MonoBehaviour {
     void Start() {
 		mArgsBuffer = new ComputeBuffer(1, mArgs.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
 		InitFishBuffers();
+        Debug.
 	}
 
 	void Update() {

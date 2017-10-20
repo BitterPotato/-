@@ -3,6 +3,7 @@
 	Properties
 	{
 		_MainTex("Diffuse", 2D) = "white" {}
+		_Atten ("Attenuation", float) = 0.3
 	}
 		SubShader
 	{
@@ -40,6 +41,8 @@
 	sampler2D _MainTex;
 	float4 _MainTex_ST;
 
+	float _Atten;
+
 	v2f vert(appdata v)
 	{
 		v2f o;
@@ -52,7 +55,8 @@
 	{
 		// sample the texture
 		fixed4 col = tex2D(_MainTex, i.uv);
-	return col;
+		col.a *= _Atten;
+		return col;
 	}
 		ENDCG
 	}

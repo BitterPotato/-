@@ -6,7 +6,7 @@
 	}
 		SubShader
 	{
-		Tags{ "Queue" = "Transparent" }
+		Tags{ "Queue" = "Transparent" "IgnoreProjector" = "True" }
 		LOD 100
 
 		Pass
