@@ -8,7 +8,7 @@ float _DeltaEdge;
 float _NearEdgeDepth;
 float _FarEdgeDepth;
 
-#define OUTLINE_DIFF_DEPTH 0.00001
+#define OUTLINE_DIFF_DEPTH 0.000001
 
 struct v2f
 {
