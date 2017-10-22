@@ -63,7 +63,8 @@ Shader "Miuna/Eye"
 		fixed4 diffuse = tex2D(_MainTex, i.uv);
 	fixed3 refraction = texCUBE(_EnvMap, i.worldRefr).rgb * _RefractColor.rgb;
 
-	fixed3 color = lerp(diffuse.rgb, refraction, _RefractWeight);
+	fixed atten = 0.6;
+	fixed3 color = lerp(diffuse.rgb, refraction, _RefractWeight) * atten;
 	return fixed4(color, diffuse.a);
 	}
 		ENDCG

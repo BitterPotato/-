@@ -1,7 +1,7 @@
 ﻿#include "UnityCG.cginc"
 #include "AutoLight.cginc"
 #include "Lighting.cginc"
-#include "../../../Common/MiunaCG.cginc"
+#include "MiunaCG.cginc"
 
 sampler2D _DiffuseTex;
 float4 _DiffuseTex_ST;
