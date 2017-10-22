@@ -14,6 +14,9 @@
 		_FresnelScale("Fresnel Scale", Range(0.0, 1.0)) = 0.5
 		_EnvMap("Environment Cubemap", Cube) = "_Skybox" {}
 
+		_AOTex("AO", 2D) = "white" {}
+		_AORatio("AO Ratio", Range(0.0, 1.0)) = 0.3
+
 		_JitterTex("Jitter Map", 2D) = "white" {}
 		_JitterCellSize ("Jitter Cell Size", Range(0.0, 1.0)) = 0.2
 		_JitterColor ("Jitter Color", Color) = (0.3, 0.4, 0.5, 1.0)
@@ -62,6 +65,9 @@
 
 		samplerCUBE _EnvMap;
 		fixed _FresnelScale;
+
+		sampler2D _AOTex;
+		fixed _AORatio;
 
 		sampler2D _JitterTex;
 		fixed4 _JitterColor;
@@ -117,6 +123,10 @@
 			fixed3 worldRefl = reflect(-worldViewDir, worldNormal);
 
 			fixed3 combinedColor = fixed3(0.0, 0.0, 0.0);
+			
+			//ambient
+			fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz;
+			combinedColor += ambient * tex2D(_AOTex, i.texcoord.xy) * _AORatio;
 
 			// diffuse ramp
 			fixed nl = halfLambert(dot(i.worldNormal, worldLightDir));
@@ -148,9 +158,9 @@
 			fixed3 jitter = tex2D(_JitterTex, ori_uv).rgb;
 
 			float low_atten = StrandSpecular(worldTan, worldViewDir, worldLightDir, _LowExponent, _LowLumi);
-			combinedColor += _JitterColor * low_atten * jitter;
+			// combinedColor += _JitterColor * low_atten * jitter;
 			float high_atten = StrandSpecular(worldTan, worldViewDir, worldLightDir, _HighExponent, _HighLumi);
-			combinedColor += _JitterColor * high_atten * jitter;
+			// combinedColor += _JitterColor * high_atten * jitter;
 
 			// env
 			fixed fresnel = _FresnelScale + (1 - _FresnelScale) * pow(1 - dot(worldViewDir, worldNormal), 5);
@@ -180,4 +190,5 @@
 		ENDCG
 	}
 	}
+	Fallback "VertexLit"
 }

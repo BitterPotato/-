@@ -9,6 +9,9 @@
 
 		_FresnelScale("Fresnel Scale", Range(0.0, 1.0)) = 0.5
 		_EnvMap("Environment Cubemap", Cube) = "_Skybox" {}
+
+		_AOTex("AO", 2D) = "white" {}
+		_AORatio("AO Ratio", Range(0.0, 1.0)) = 0.3
 	}
 		SubShader
 	{
@@ -25,8 +28,11 @@
 		#pragma fragment frag_base_base
 
 		#define ENVRIMLIGHT
+		#define CAST_SHADOW
+		#define AO
 		#include "MiunaRamp.cg"
 		ENDCG
 	}
 	}
+	Fallback "VertexLit"
 }

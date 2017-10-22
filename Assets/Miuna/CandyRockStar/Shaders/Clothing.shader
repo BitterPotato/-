@@ -13,6 +13,10 @@
 
 		_FresnelScale ("Fresnel Scale", Range(0.0, 1.0)) = 0.5
 		_EnvMap("Environment Cubemap", Cube) = "_Skybox" {}
+
+		_AOTex("AO", 2D) = "white" {}
+		_AORatio("AO Ratio", Range(0.0, 1.0)) = 0.3 
+
 		// ==== for outline ====
 		_EdgeThickness ("Edge Thickness", float) = 0.001
 		_DeltaEdge ("Delta Edge", float) = 0.001
@@ -35,25 +39,28 @@
 			
 			#define SPECULAR
 			#define ENVRIMLIGHT
+			#define CAST_SHADOW
+			#define AO
 			#include "MiunaRamp.cg"
 
 			ENDCG
 		}
 		// TODO: outline is not in balance
-		Pass {
-			Name "Outline"
+		//Pass {
+		//	Name "Outline"
 
-			Cull Front
-			ZTest Less
+		//	Cull Front
+		//	ZTest Less
 
-			CGPROGRAM
+		//	CGPROGRAM
 
-			#pragma vertex outlineVert
-			#pragma fragment outlineFrag
+		//	#pragma vertex outlineVert
+		//	#pragma fragment outlineFrag
 
-			#include "MiunaCharacter.cg"
+		//	#include "MiunaCharacter.cg"
 
-			ENDCG
-		}
+		//	ENDCG
+		//}
 	}
+	Fallback "VertexLit"
 }

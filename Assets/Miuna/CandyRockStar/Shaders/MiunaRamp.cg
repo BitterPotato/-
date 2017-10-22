@@ -20,13 +20,18 @@ samplerCUBE _EnvMap;
 fixed _FresnelScale;
 #endif
 
+#ifdef AO
+sampler2D _AOTex;
+fixed _AORatio;
+#endif
+
 struct v2f_base
 {
 	float4 pos : SV_POSITION;
 	float4 texcoord : TEXCOORD0;
 	float3 worldNormal : TEXCOORD2;
 	float3 worldPos : TEXCOORD3;
-	// SHADOW_COORDS(4)
+	SHADOW_COORDS(4)
 };
 
 v2f_base vert_base(appdata_base v)
@@ -39,7 +44,9 @@ v2f_base vert_base(appdata_base v)
 	o.texcoord.xy = TRANSFORM_TEX(v.texcoord.xy, _DiffuseTex);
 	o.texcoord.zw = TRANSFORM_TEX(v.texcoord.xy, _SpecularTex);
 
-	// TRANSFER_SHADOW(o);
+	#ifdef CAST_SHADOW
+	TRANSFER_SHADOW(o);
+	#endif
 
 	return o;
 }
@@ -55,6 +62,12 @@ fixed4 frag_base_add(v2f_base i) : SV_Target
 	#endif
 
 	fixed3 combinedColor = fixed3(0.0, 0.0, 0.0);
+
+	#ifdef AO
+	// ambient
+	fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz;
+	combinedColor += ambient * tex2D(_AOTex, i.texcoord.xy) * _AORatio;
+	#endif
 
 	// diffuse ramp
 	fixed nl = halfLambert(dot(i.worldNormal, worldLightDir));
@@ -83,8 +96,13 @@ fixed4 frag_base_add(v2f_base i) : SV_Target
 	fixed fresnel = _FresnelScale + (1 - _FresnelScale) * pow(1 - dot(worldViewDir, worldNormal), 5);
 	combinedColor += saturate(fresnel) * texCUBE(_EnvMap, worldRefl).rgb;
 	#endif
-	// combine shadow to light atten
-	// UNITY_LIGHT_ATTENUATION(atten, i, i.worldPos);
+
+	#ifdef CAST_SHADOW
+	UNITY_LIGHT_ATTENUATION(atten, i, i.worldPos);
+	// combinedColor = lerp(pow(combinedColor, 1), combinedColor, atten);
+	// combinedColor *= atten;
+	// combinedColor = fixed3(atten, atten, atten);
+	#endif
 		
 	// the alpha aisle not in use right now
 	return fixed4(combinedColor, 1.0);
