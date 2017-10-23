@@ -45,7 +45,7 @@ SubShader {
 		sampler2D _GrabBlurTexture;
 		float4 _GrabBlurTexture_TexelSize;
 
-		struct v2f {
+		struct v2f 
 			float4 pos	: SV_POSITION;
 			float2 uv	: TEXCOORD0;
 			fixed4 color : TEXCOORD1;
