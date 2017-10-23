@@ -9,7 +9,10 @@ public class CameraSwitcher : MonoBehaviour
     public float stability = 0.5f;
     public float rotationSpeed = 2.0f;
     public float minDistance = 0.5f;
-    public AnimationCurve fovCurve = AnimationCurve.Linear(1, 30, 10, 30);
+    // add fov
+    //public AnimationCurve fovCurve = AnimationCurve.Linear(1, 30, 10, 30);
+    // TODO: why in this curve, the fov can still be sampled to be 22 at time 3.3???
+    public AnimationCurve fovCurve = AnimationCurve.Linear(1, 60, 10, 90);
     public bool autoChange = true;
 
     Transform target;
@@ -48,13 +51,13 @@ public class CameraSwitcher : MonoBehaviour
 
         // TODO: temp solution
         // later miuna should be moved into a prefab and should be positioned at (0, 0, 0)
-        Vector3 miunaPos = new Vector3(5.29f, 0.0f, -3.3f);
+        //Vector3 miunaPos = new Vector3(5.29f, 0.0f, -3.3f);
 
-        // Move to the point.
+        // Move to the point
         transform.position = destination.position;
-        transform.RotateAround(Vector3.zero, Vector3.up, Mathf.PI);
-        transform.Translate(miunaPos, Space.World);
-        
+        //transform.RotateAround(Vector3.zero, Vector3.up, Mathf.PI);
+        //transform.Translate(miunaPos, Space.World);
+
 
         // Snap if stable; Shake if unstable.
         if (Random.value < stability || forceStable)
@@ -64,6 +67,11 @@ public class CameraSwitcher : MonoBehaviour
 
         // Update the FOV depending on the distance to the target.
         var dist = Vector3.Distance(target.position, transform.position);
+        //float fov = fovCurve.Evaluate(dist);
+        //if(fov < 40)
+        //{
+        //    var i = 0;
+        //}
         GetComponentInChildren<Camera>().fieldOfView = fovCurve.Evaluate(dist);
     }
 

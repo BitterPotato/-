@@ -88,8 +88,51 @@
 			// SHADOW_COORDS(4)
 		};
 
+		void xRotate(inout float3 toModify, float radian)
+		{
+			float sinv = sin(radian);
+			float cosv = cos(radian);
+
+			float3x3 rotateMatrix = float3x3(
+				1.0, 0.0, 0.0,
+				0.0, cosv, -sinv,
+				0.0, sinv, cosv
+				);
+
+			toModify = mul(toModify, rotateMatrix);
+		}
+
+		void yRotate(inout float3 toModify, float radian)
+		{
+			float sinv = sin(radian);
+			float cosv = cos(radian);
+
+			float3x3 rotateMatrix = float3x3(
+				cosv, 0.0, sinv,
+				0.0, 1.0, 0.0,
+				-sinv, 0.0, cosv
+				);
+
+			toModify = mul(toModify, rotateMatrix);
+		}
+
+		void zRotate(inout float3 toModify, float radian)
+		{
+			float sinv = sin(radian);
+			float cosv = cos(radian);
+
+			float3x3 rotateMatrix = float3x3(
+				cosv, -sinv, 0.0,
+				sinv, cosv, 0.0,
+				0.0, 0.0, 1.0
+				);
+
+			toModify = mul(toModify, rotateMatrix);
+		}
+
 		// exponent upper : spread lower； strength upper : light upper 
 		float StrandSpecular(float3 T, float3 V, float3 L, float exponent, float strength) {
+			// zRotate(T, radians(90.0));
 			float3 H = normalize(L + V);
 			float dotTH = dot(T, H);
 			float sinTH = sqrt(1.0 - dotTH*dotTH);
@@ -124,9 +167,13 @@
 
 			fixed3 combinedColor = fixed3(0.0, 0.0, 0.0);
 			
+			fixed2 ori_uv = i.texcoord.xy;
+			ori_uv.x = fmod(ori_uv.x, _JitterCellSize) / _JitterCellSize;
+			ori_uv.y = fmod(ori_uv.y, _JitterCellSize) / _JitterCellSize;
+
 			//ambient
 			fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz;
-			combinedColor += ambient * tex2D(_AOTex, i.texcoord.xy) * _AORatio;
+			combinedColor += ambient * tex2D(_AOTex, ori_uv.xy) * _AORatio;
 
 			// diffuse ramp
 			fixed nl = halfLambert(dot(i.worldNormal, worldLightDir));
@@ -134,33 +181,28 @@
 			fixed rampU = 1 - min(nl, nv);
 			fixed3 diffuseRamp = tex2D(_DiffuseRamp, fixed2(rampU, _DiffuseVert));
 
-			fixed3 diffuse = tex2D(_DiffuseTex, i.texcoord.xy).rgb;
+			fixed3 diffuse = tex2D(_DiffuseTex, ori_uv.xy).rgb;
 			fixed3 rampDiffuse = diffuse * diffuse;
 			rampDiffuse.b += diffuseRamp.b;
 			// combinedColor += diffuse * diffuseRamp.rgb;
 			// combinedColor += lerp(rampDiffuse, diffuse, diffuseRamp) * _LightColor0.rgb;
 
 			// specular ramp
-			//fixed3 halfDir = normalize(worldViewDir + worldLightDir);
-			//fixed phong = max(0, pow(dot(halfDir, worldNormal), 5));
-			//fixed4 specularRamp = tex2D(_SpecularRamp, fixed2(1 - phong, _SpecularVert));
+			fixed3 halfDir = normalize(worldViewDir + worldLightDir);
+			fixed phong = max(0, pow(dot(halfDir, worldNormal), 5));
+			fixed4 specularRamp = tex2D(_SpecularRamp, fixed2(1 - phong, _SpecularVert));
 
-			//fixed3 specular = tex2D(_SpecularTex, i.texcoord.zw).rgb;
-			//// combinedColor += specular * specularRamp.rgb;
-			//combinedColor += specular * pow(specularRamp.rgb, 25) * _LightColor0.rgb;
+			fixed3 specular = tex2D(_SpecularTex, i.texcoord.zw).rgb;
+			// combinedColor += specular * specularRamp.rgb;
+			// combinedColor += specular * pow(specularRamp.rgb, 4) * _LightColor0.rgb;
 
 			// jitter
-			fixed2 ori_uv = i.texcoord.xy;
-			// ori_uv.x = smoothstep(fmod(ori_uv.x, _JitterCellSize), 0.0, _JitterCellSize);
-			// ori_uv.y = smoothstep(fmod(ori_uv.y, _JitterCellSize), 0.0, _JitterCellSize);
-			ori_uv.x = fmod(ori_uv.x, _JitterCellSize) / _JitterCellSize;
-			ori_uv.y = fmod(ori_uv.y, _JitterCellSize) / _JitterCellSize;
 			fixed3 jitter = tex2D(_JitterTex, ori_uv).rgb;
 
 			float low_atten = StrandSpecular(worldTan, worldViewDir, worldLightDir, _LowExponent, _LowLumi);
-			// combinedColor += _JitterColor * low_atten * jitter;
+			combinedColor += specular * low_atten * jitter;
 			float high_atten = StrandSpecular(worldTan, worldViewDir, worldLightDir, _HighExponent, _HighLumi);
-			// combinedColor += _JitterColor * high_atten * jitter;
+			combinedColor += specular * high_atten * jitter;
 
 			// env
 			fixed fresnel = _FresnelScale + (1 - _FresnelScale) * pow(1 - dot(worldViewDir, worldNormal), 5);

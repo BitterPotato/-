@@ -20,7 +20,9 @@ Shader "Miuna/Eye"
 		{
 			Blend SrcAlpha OneMinusSrcAlpha, One One
 			Cull Back
-			ZTest LEqual
+			// ZTest LEqual
+			// Notice: prevent eye to be partly culling sometimes
+			ZTest Off
 
 			CGPROGRAM
 	#pragma vertex vert
