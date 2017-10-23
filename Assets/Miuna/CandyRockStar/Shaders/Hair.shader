@@ -190,19 +190,24 @@
 			// specular ramp
 			fixed3 halfDir = normalize(worldViewDir + worldLightDir);
 			fixed phong = max(0, pow(dot(halfDir, worldNormal), 5));
-			fixed4 specularRamp = tex2D(_SpecularRamp, fixed2(1 - phong, _SpecularVert));
+			fixed3 specularRamp = tex2D(_SpecularRamp, fixed2(1 - phong, _SpecularVert));
+			specularRamp = pow(specularRamp, 0.1);
 
 			fixed3 specular = tex2D(_SpecularTex, i.texcoord.zw).rgb;
 			// combinedColor += specular * specularRamp.rgb;
-			// combinedColor += specular * pow(specularRamp.rgb, 4) * _LightColor0.rgb;
+			combinedColor += specular * pow(specularRamp.rgb, 100) * _LightColor0.rgb;
 
 			// jitter
-			fixed3 jitter = tex2D(_JitterTex, ori_uv).rgb;
+			fixed lerp_weight = 0.3;
+			fixed jitter = (1.0 - Luminance(tex2D(_JitterTex, ori_uv).rgb))*2;
 
 			float low_atten = StrandSpecular(worldTan, worldViewDir, worldLightDir, _LowExponent, _LowLumi);
-			combinedColor += specular * low_atten * jitter;
+			fixed3 lowatten_Ramp = lerp(specularRamp, fixed3(low_atten, low_atten, low_atten), lerp_weight);
+			combinedColor += specular * _JitterColor * lowatten_Ramp * jitter * _LightColor0.rgb;
+
 			float high_atten = StrandSpecular(worldTan, worldViewDir, worldLightDir, _HighExponent, _HighLumi);
-			combinedColor += specular * high_atten * jitter;
+			fixed3 highatten_Ramp = lerp(specularRamp, fixed3(high_atten, high_atten, high_atten), lerp_weight);
+			combinedColor += specular * _JitterColor *  highatten_Ramp * jitter * _LightColor0.rgb;
 
 			// env
 			fixed fresnel = _FresnelScale + (1 - _FresnelScale) * pow(1 - dot(worldViewDir, worldNormal), 5);

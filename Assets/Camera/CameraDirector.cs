@@ -4,22 +4,26 @@ using UnityEngine;
 
 public class CameraDirector : MonoBehaviour {
 
+    public GameObject musicPlayerPrefab;
     public GameObject mainCameraRigPrefab;
     // Camera points.
     public Transform[] cameraPoints;
 
     CameraSwitcher mainCameraSwitcher;
+    GameObject musicPlayer;
 
     // Use this for initialization
     void Start () {
+        musicPlayer = musicPlayer = (GameObject)Instantiate(musicPlayerPrefab);
+
         var cameraRig = (GameObject)Instantiate(mainCameraRigPrefab);
         mainCameraSwitcher = cameraRig.GetComponentInChildren<CameraSwitcher>();
     }
 	
 	// Update is called once per frame
 	void Update () {
-		
-	}
+ 
+    }
     
     public void SwitchCamera(int index)
     {
@@ -42,6 +46,8 @@ public class CameraDirector : MonoBehaviour {
     // declare those animate event to avoid run warning
     public void StartMusic()
     {
+        foreach (var source in musicPlayer.GetComponentsInChildren<AudioSource>())
+            source.Play();
     }
 
     public void ActivateProps()
