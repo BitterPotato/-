@@ -18,7 +18,8 @@
 	{
 		Blend SrcAlpha OneMinusSrcAlpha, One One
 		Cull Back
-		ZTest OFF
+		// ZTest OFF
+		ZTest LEqual
 
 		CGPROGRAM
 #pragma vertex vert

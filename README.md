@@ -1,6 +1,8 @@
 # Miuna
 
-![](http://oi0xi3dzx.bkt.clouddn.com/graphics/project/currentDemo.gif)
+[Live Demo](https://vimeo.com/239478009)
+
+> not fully complete, so only record some frames.
 
 
 
@@ -14,6 +16,7 @@
 
 ### Books & Blogs
 
+* [《崩坏三》卡通渲染](http://youxiputao.com/articles/11839?from=timeline&isappinstalled)
 * [Unity Shader入门精要](https://book.douban.com/subject/26821639/)
 * [Unity Shaders and Effects Cookbook](https://book.douban.com/subject/24835416/)
 * [Steering Behaviors For Autonomous Characters ](http://www.red3d.com/cwr/steer/gdc99/)
