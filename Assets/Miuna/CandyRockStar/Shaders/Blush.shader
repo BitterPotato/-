@@ -20,6 +20,8 @@
 		Cull Back
 		// ZTest OFF
 		ZTest LEqual
+		// Notice: to avoid the cheek accidently cull part of eye
+		ZWrite Off
 
 		CGPROGRAM
 #pragma vertex vert
