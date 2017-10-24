@@ -14,8 +14,6 @@ public class CameraDirector : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        musicPlayer = musicPlayer = (GameObject)Instantiate(musicPlayerPrefab);
-
         var cameraRig = (GameObject)Instantiate(mainCameraRigPrefab);
         mainCameraSwitcher = cameraRig.GetComponentInChildren<CameraSwitcher>();
     }
@@ -46,6 +44,10 @@ public class CameraDirector : MonoBehaviour {
     // declare those animate event to avoid run warning
     public void StartMusic()
     {
+
+        if(musicPlayer == null)
+            // Notice: it seem that when GameObject once cloned in the scene, the audio will play
+            musicPlayer = (GameObject)Instantiate(musicPlayerPrefab);
         foreach (var source in musicPlayer.GetComponentsInChildren<AudioSource>())
             source.Play();
     }
