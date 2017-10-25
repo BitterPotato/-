@@ -1,8 +1,42 @@
 # Miuna
 
-[Live Demo](https://vimeo.com/239478009)
+## Done && Features
 
-> not fully complete, so only record some frames.
+### Model
+
+* brige(pier&dam&support)、road、house、pillar、moutain and their uv
+* modified character texture; bake ao texture
+
+### Scene
+
+* blinn-phong lighting model
+
+* Fish Flock Simulation(compute shader/ GPU instance)
+
+  > Fish can move and rotate, but not animate
+
+* Fog/ Sky Simulation(perlin fbm noise)
+
+* Blur Effect for far mountains(command Buffer)
+
+* Mountain & Road(Bumped Map)
+
+### Character
+
+* back-based outline
+* diffuse & specular ramp shading
+* IBL based rimlight and eye refract
+* use ao texture on skin/ hair/ face
+
+### Referenced
+
+* character model & animation
+* audio resource
+* camera movement
+
+## TODO
+
+still so much...
 
 
 
