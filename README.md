@@ -1,6 +1,6 @@
 # Miuna
 
-![One Frame Of Live Demo](http://oi0xi3dzx.bkt.clouddn.com/graphics/project/render_result.png)
+![One Frame Of Live Demo](http://45.63.110.68/uploads/big/7969c035b66b0f8bebaec3819d5b71af.png)
 
 ## Done && Features
 
@@ -46,10 +46,9 @@ still so much...
 
 ### Concept Design
 
-![](http://oi0xi3dzx.bkt.clouddn.com/graphics/project/scene.jpg)
+![](http://45.63.110.68/uploads/medium/3ba3be4eb0ac5caa497e84517981616c.jpg)
 
-![](http://oi0xi3dzx.bkt.clouddn.com/graphics/project/miuna.jpg)
-
+![](http://45.63.110.68/uploads/medium/df69ff8a3e63f04f98958d598159be8e.jpg)
 ### Books & Blogs
 
 * [《崩坏三》卡通渲染](http://youxiputao.com/articles/11839?from=timeline&isappinstalled)
